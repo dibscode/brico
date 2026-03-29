@@ -29,7 +29,7 @@ class ListCashTransactions extends ListRecords
 
         $actions[] = Action::make('export')
             ->label('Export')
-            ->form([
+            ->schema([
                 Select::make('format')
                     ->label('Format')
                     ->options([
