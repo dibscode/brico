@@ -24,5 +24,5 @@ Aplikasi koperasi berbasis Laravel + Filament.
 
 - URL: `/admin`
 - Buat akun admin via CLI:
-  - `php artisan user:create-admin admin@brico.test --name="Admin BRICO" --password="password" --force`
+	- `php artisan user:create-admin you@example.com --name="Admin" --password="<set-strong-password>" --force`
 
