@@ -11,12 +11,14 @@
 
     $panelId = filament()->getCurrentOrDefaultPanel()?->getId() ?? 'admin';
 
+    $isDashboard = request()->is('admin') || request()->routeIs('filament.' . $panelId . '.pages.dashboard');
+
     $items = [
         [
             'label' => 'Beranda',
             'icon' => 'bi bi-house-door-fill',
             'url' => Dashboard::getUrl(panel: $panelId, isAbsolute: false),
-            'active' => request()->is('admin') || request()->routeIs('filament.' . $panelId . '.pages.dashboard'),
+            'active' => $isDashboard,
         ],
         [
             'label' => 'Anggota',
@@ -44,6 +46,17 @@
         ],
     ];
 @endphp
+
+@if ($isDashboard)
+    <div
+        class="pointer-events-none fixed bottom-24 right-3 z-40 select-none rounded-lg bg-white/70 px-3 py-2 text-[10px] text-slate-500 backdrop-blur md:bottom-6 md:right-6 md:text-xs"
+        aria-hidden="true"
+    >
+        <div class="font-semibold text-slate-600">Dibscode Software House</div>
+        <div>Instagram: @dibscode</div>
+        <div>WhatsApp: 6282244428970</div>
+    </div>
+@endif
 
 <nav class="fixed inset-x-0 bottom-0 z-50 border-t border-slate-200 bg-white/95 backdrop-blur supports-[backdrop-filter]:bg-white/80 md:hidden">
     <div class="mx-auto grid max-w-md grid-cols-5 px-2 pb-[max(env(safe-area-inset-bottom),0px)] pt-2">
