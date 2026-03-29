@@ -1,0 +1,32 @@
+#!/usr/bin/env php
+<?php
+
+use Illuminate\Foundation\Application;
+use Symfony\Component\Console\Input\ArgvInput;
+
+define('LARAVEL_START', microtime(true));
+
+// Octane (and Symfony Console) may reference POSIX signal constants (SIGINT, SIGTERM, SIGHUP).
+// These constants are usually provided by the pcntl extension, which is unavailable on Windows.
+// Defining them here prevents fatal errors while still allowing Symfony to skip signal handling
+// when pcntl functions are not present.
+if (PHP_OS_FAMILY === 'Windows') {
+	defined('SIGINT') || define('SIGINT', 2);
+	defined('SIGQUIT') || define('SIGQUIT', 3);
+	defined('SIGTERM') || define('SIGTERM', 15);
+	defined('SIGHUP') || define('SIGHUP', 1);
+	defined('SIGUSR1') || define('SIGUSR1', 10);
+	defined('SIGUSR2') || define('SIGUSR2', 12);
+	defined('SIGALRM') || define('SIGALRM', 14);
+}
+
+// Register the Composer autoloader...
+require __DIR__.'/vendor/autoload.php';
+
+// Bootstrap Laravel and handle the command...
+/** @var Application $app */
+$app = require_once __DIR__.'/bootstrap/app.php';
+
+$status = $app->handleCommand(new ArgvInput);
+
+exit($status);

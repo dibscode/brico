@@ -1,0 +1,14 @@
+Saat ZIP project Laravel ini, folder besar yang umumnya TIDAK perlu ikut:
+
+- vendor/            (akan diinstall ulang lewat `composer install`)
+- node_modules/      (akan dibangun ulang lewat `npm install`)
+- storage/logs/*
+- storage/framework/cache/*
+- storage/framework/sessions/*
+- storage/framework/views/*
+- bootstrap/cache/*.php
+- public/build/      (kalau pakai Vite, bisa build ulang)
+
+Catatan:
+- Jangan hapus `vendor/` kalau kamu ingin project langsung jalan tanpa menjalankan Composer.
+- Untuk sharing source code saja, exclude `vendor/` biasanya yang paling besar.
