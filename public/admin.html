@@ -1,0 +1,802 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <title>Koperasi BRI – Admin</title>
+  <style>
+    /* ── Reset & base ─────────────────────────────────────────── */
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+      --bri-blue:       #00529B;
+      --bri-blue-dark:  #003E78;
+      --bri-blue-light: #1A6EC0;
+      --bri-orange:     #F5A623;
+      --bri-green:      #27AE60;
+      --bri-red:        #E74C3C;
+      --bg:             #F2F5FA;
+      --card:           #FFFFFF;
+      --text:           #1A1A2E;
+      --muted:          #7A8BA0;
+      --border:         #E3EAF2;
+      --radius:         14px;
+      --shadow:         0 2px 12px rgba(0,82,155,.10);
+      --nav-h:          62px;
+      --safe-bottom:    env(safe-area-inset-bottom, 0px);
+    }
+
+    html, body {
+      height: 100%;
+      background: var(--bg);
+      font-family: 'Roboto', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      color: var(--text);
+      -webkit-tap-highlight-color: transparent;
+      overscroll-behavior: none;
+    }
+
+    /* ── Mobile shell ─────────────────────────────────────────── */
+    .shell {
+      max-width: 430px;
+      min-height: 100dvh;
+      margin: 0 auto;
+      background: var(--bg);
+      position: relative;
+      display: flex;
+      flex-direction: column;
+    }
+
+    /* ── Scrollable content area ──────────────────────────────── */
+    .content {
+      flex: 1;
+      overflow-y: auto;
+      padding-bottom: calc(var(--nav-h) + var(--safe-bottom) + 8px);
+    }
+
+    /* ── Status bar simulation ────────────────────────────────── */
+    .status-bar {
+      background: var(--bri-blue-dark);
+      height: 24px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 16px;
+    }
+    .status-bar span {
+      font-size: 11px;
+      font-weight: 600;
+      color: #fff;
+      letter-spacing: .3px;
+    }
+    .status-icons { display: flex; gap: 6px; align-items: center; }
+    .status-icons svg { width: 14px; height: 14px; fill: #fff; }
+
+    /* ── Header / Hero ────────────────────────────────────────── */
+    .header {
+      background: linear-gradient(160deg, var(--bri-blue) 0%, var(--bri-blue-light) 100%);
+      padding: 16px 20px 28px;
+      position: relative;
+      overflow: hidden;
+    }
+    .header::after {
+      content: '';
+      position: absolute;
+      width: 220px; height: 220px;
+      border-radius: 50%;
+      background: rgba(255,255,255,.06);
+      right: -60px; top: -60px;
+    }
+    .header-top {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 20px;
+    }
+    .logo-row { display: flex; align-items: center; gap: 10px; }
+    .logo-mark {
+      width: 38px; height: 38px;
+      background: var(--bri-orange);
+      border-radius: 10px;
+      display: flex; align-items: center; justify-content: center;
+      font-weight: 900;
+      font-size: 15px;
+      color: #fff;
+      letter-spacing: -.5px;
+      flex-shrink: 0;
+    }
+    .logo-text h1 { font-size: 14px; font-weight: 700; color: #fff; line-height: 1.2; }
+    .logo-text p  { font-size: 10px; color: rgba(255,255,255,.75); }
+
+    .header-actions { display: flex; gap: 10px; }
+    .icon-btn {
+      width: 36px; height: 36px;
+      border-radius: 50%;
+      background: rgba(255,255,255,.15);
+      border: none;
+      display: flex; align-items: center; justify-content: center;
+      cursor: pointer;
+      position: relative;
+    }
+    .icon-btn svg { width: 18px; height: 18px; stroke: #fff; fill: none; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; }
+    .badge {
+      position: absolute;
+      top: 5px; right: 5px;
+      width: 8px; height: 8px;
+      background: var(--bri-orange);
+      border-radius: 50%;
+      border: 1.5px solid var(--bri-blue);
+    }
+
+    /* Greeting */
+    .greeting { color: rgba(255,255,255,.80); font-size: 12px; margin-bottom: 2px; }
+    .admin-name { color: #fff; font-size: 20px; font-weight: 700; margin-bottom: 14px; }
+
+    /* ── Summary chip row ─────────────────────────────────────── */
+    .summary-chips {
+      display: flex;
+      gap: 8px;
+    }
+    .chip {
+      background: rgba(255,255,255,.15);
+      border-radius: 20px;
+      padding: 5px 12px;
+      display: flex;
+      align-items: center;
+      gap: 5px;
+    }
+    .chip-dot {
+      width: 7px; height: 7px;
+      border-radius: 50%;
+    }
+    .chip span { font-size: 11px; color: #fff; font-weight: 500; }
+
+    /* ── Stats cards strip ────────────────────────────────────── */
+    .stats-strip {
+      display: flex;
+      gap: 10px;
+      padding: 0 16px;
+      margin-top: -22px;
+      margin-bottom: 4px;
+    }
+    .stat-card {
+      flex: 1;
+      background: var(--card);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      padding: 14px 10px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 4px;
+    }
+    .stat-icon {
+      width: 36px; height: 36px;
+      border-radius: 10px;
+      display: flex; align-items: center; justify-content: center;
+      margin-bottom: 4px;
+    }
+    .stat-icon svg { width: 18px; height: 18px; }
+    .stat-value {
+      font-size: 16px;
+      font-weight: 800;
+      color: var(--text);
+      line-height: 1;
+    }
+    .stat-label {
+      font-size: 9.5px;
+      color: var(--muted);
+      text-align: center;
+      line-height: 1.3;
+    }
+
+    /* ── Section header ───────────────────────────────────────── */
+    .sec-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 18px 16px 10px;
+    }
+    .sec-title { font-size: 14px; font-weight: 700; color: var(--text); }
+    .sec-link  { font-size: 12px; color: var(--bri-blue); font-weight: 500; }
+
+    /* ── Financial overview card ──────────────────────────────── */
+    .finance-card {
+      margin: 0 16px;
+      background: var(--card);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      padding: 16px;
+    }
+    .finance-card-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 14px;
+    }
+    .finance-card-header h3 { font-size: 12px; color: var(--muted); font-weight: 500; }
+    .balance-row {
+      display: flex;
+      align-items: flex-end;
+      gap: 6px;
+      margin-bottom: 16px;
+    }
+    .balance-amount {
+      font-size: 26px;
+      font-weight: 800;
+      color: var(--text);
+      line-height: 1;
+    }
+    .balance-currency { font-size: 14px; color: var(--muted); font-weight: 500; padding-bottom: 2px; }
+    .finance-divider { height: 1px; background: var(--border); margin-bottom: 14px; }
+    .finance-row {
+      display: flex;
+      justify-content: space-between;
+    }
+    .finance-item { display: flex; flex-direction: column; gap: 3px; }
+    .finance-item-label { font-size: 10px; color: var(--muted); }
+    .finance-item-value { font-size: 13px; font-weight: 700; }
+    .finance-item-value.up   { color: var(--bri-green); }
+    .finance-item-value.down { color: var(--bri-red); }
+
+    /* ── Trend bar ────────────────────────────────────────────── */
+    .trend-bar {
+      display: flex;
+      align-items: flex-end;
+      gap: 5px;
+      height: 40px;
+      margin-top: 14px;
+    }
+    .trend-col {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 4px;
+    }
+    .bar-bg {
+      width: 100%;
+      height: 32px;
+      background: var(--border);
+      border-radius: 4px;
+      overflow: hidden;
+      display: flex;
+      align-items: flex-end;
+    }
+    .bar-fill {
+      width: 100%;
+      border-radius: 4px;
+      transition: height .4s ease;
+    }
+    .bar-label { font-size: 9px; color: var(--muted); }
+
+    /* ── Quick actions ────────────────────────────────────────── */
+    .quick-actions {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 8px;
+      padding: 0 16px;
+    }
+    .qa-btn {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 6px;
+      background: none;
+      border: none;
+      cursor: pointer;
+      padding: 8px 4px;
+      border-radius: 12px;
+      transition: background .15s;
+    }
+    .qa-btn:active { background: rgba(0,82,155,.07); }
+    .qa-icon {
+      width: 52px; height: 52px;
+      border-radius: 16px;
+      display: flex; align-items: center; justify-content: center;
+    }
+    .qa-icon svg { width: 22px; height: 22px; }
+    .qa-label { font-size: 10px; color: var(--text); font-weight: 500; text-align: center; line-height: 1.3; }
+
+    /* ── Member list ──────────────────────────────────────────── */
+    .member-list {
+      display: flex;
+      flex-direction: column;
+      gap: 0;
+      margin: 0 16px;
+      background: var(--card);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      overflow: hidden;
+    }
+    .member-item {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 12px 14px;
+      border-bottom: 1px solid var(--border);
+    }
+    .member-item:last-child { border-bottom: none; }
+    .avatar {
+      width: 40px; height: 40px;
+      border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 14px;
+      font-weight: 700;
+      color: #fff;
+      flex-shrink: 0;
+    }
+    .member-info { flex: 1; min-width: 0; }
+    .member-name { font-size: 13px; font-weight: 600; color: var(--text); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .member-id   { font-size: 10px; color: var(--muted); margin-top: 1px; }
+    .member-badge {
+      font-size: 9.5px;
+      font-weight: 600;
+      padding: 3px 8px;
+      border-radius: 20px;
+    }
+    .badge-aktif    { background: #E8F8EF; color: var(--bri-green); }
+    .badge-nonaktif { background: #FEF0EE; color: var(--bri-red); }
+
+    /* ── Transactions ─────────────────────────────────────────── */
+    .tx-list {
+      display: flex;
+      flex-direction: column;
+      gap: 0;
+      margin: 0 16px;
+      background: var(--card);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      overflow: hidden;
+    }
+    .tx-item {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 12px 14px;
+      border-bottom: 1px solid var(--border);
+    }
+    .tx-item:last-child { border-bottom: none; }
+    .tx-icon {
+      width: 38px; height: 38px;
+      border-radius: 12px;
+      display: flex; align-items: center; justify-content: center;
+      flex-shrink: 0;
+    }
+    .tx-icon svg { width: 17px; height: 17px; }
+    .tx-info { flex: 1; min-width: 0; }
+    .tx-desc { font-size: 12.5px; font-weight: 600; color: var(--text); }
+    .tx-meta { font-size: 10px; color: var(--muted); margin-top: 1px; }
+    .tx-amount { font-size: 12.5px; font-weight: 700; flex-shrink: 0; }
+    .tx-amount.credit { color: var(--bri-green); }
+    .tx-amount.debit  { color: var(--bri-red); }
+
+    /* ── Bottom nav ───────────────────────────────────────────── */
+    .bottom-nav {
+      position: fixed;
+      bottom: 0;
+      left: 50%; transform: translateX(-50%);
+      width: 100%;
+      max-width: 430px;
+      height: calc(var(--nav-h) + var(--safe-bottom));
+      padding-bottom: var(--safe-bottom);
+      background: var(--card);
+      border-top: 1px solid var(--border);
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-around;
+      padding-top: 8px;
+      z-index: 100;
+    }
+    .nav-item {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 3px;
+      background: none;
+      border: none;
+      cursor: pointer;
+      padding: 0 12px;
+      min-width: 60px;
+    }
+    .nav-item svg { width: 22px; height: 22px; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; }
+    .nav-item span { font-size: 9.5px; font-weight: 500; }
+    .nav-item.active svg { stroke: var(--bri-blue); fill: none; }
+    .nav-item.active span { color: var(--bri-blue); }
+    .nav-item:not(.active) svg { stroke: var(--muted); fill: none; }
+    .nav-item:not(.active) span { color: var(--muted); }
+
+    /* center FAB nav item */
+    .nav-fab-wrap {
+      display: flex; flex-direction: column; align-items: center; gap: 3px;
+      margin-top: -18px;
+    }
+    .nav-fab {
+      width: 50px; height: 50px;
+      background: linear-gradient(145deg, var(--bri-blue) 0%, var(--bri-blue-light) 100%);
+      border-radius: 50%;
+      border: 3px solid var(--card);
+      box-shadow: 0 4px 16px rgba(0,82,155,.35);
+      display: flex; align-items: center; justify-content: center;
+      cursor: pointer;
+    }
+    .nav-fab svg { width: 20px; height: 20px; stroke: #fff; fill: none; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+    .nav-fab-label { font-size: 9.5px; font-weight: 500; color: var(--muted); margin-top: -2px; }
+
+    /* ── Ripple effect ────────────────────────────────────────── */
+    .ripple { position: relative; overflow: hidden; }
+    .ripple::after {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: rgba(0,0,0,.06);
+      opacity: 0;
+      border-radius: inherit;
+      transition: opacity .2s;
+    }
+    .ripple:active::after { opacity: 1; }
+
+    /* ── Scrollbar hide ───────────────────────────────────────── */
+    .content::-webkit-scrollbar { display: none; }
+    .content { -ms-overflow-style: none; scrollbar-width: none; }
+  </style>
+</head>
+<body>
+<div class="shell">
+
+  <!-- Android status bar -->
+  <div class="status-bar">
+    <span id="clock">09:41</span>
+    <div class="status-icons">
+      <!-- Signal -->
+      <svg viewBox="0 0 24 24"><rect x="2" y="16" width="3" height="6" rx="1"/><rect x="7" y="12" width="3" height="10" rx="1"/><rect x="12" y="8" width="3" height="14" rx="1"/><rect x="17" y="4" width="3" height="18" rx="1"/></svg>
+      <!-- WiFi -->
+      <svg viewBox="0 0 24 24"><path d="M5 12.5C7.1 10.4 9.9 9 13 9s5.9 1.4 8 3.5M1 8.5C4.1 5.4 8.3 3.5 13 3.5s8.9 1.9 12 5M9 16.5a5.7 5.7 0 0 1 8 0M13 21h.01"/></svg>
+      <!-- Battery -->
+      <svg viewBox="0 0 24 24"><rect x="2" y="7" width="18" height="11" rx="2" ry="2"/><path d="M22 11v3"/><rect x="4" y="9" width="13" height="7" rx="1" fill="currentColor"/></svg>
+    </div>
+  </div>
+
+  <!-- Scrollable content -->
+  <div class="content" id="content">
+
+    <!-- ── Header ──────────────────────────────────────────── -->
+    <div class="header">
+      <div class="header-top">
+        <div class="logo-row">
+          <div class="logo-mark">BRI</div>
+          <div class="logo-text">
+            <h1>Koperasi BRI</h1>
+            <p>Panel Admin</p>
+          </div>
+        </div>
+        <div class="header-actions">
+          <button class="icon-btn ripple" aria-label="Notifikasi">
+            <svg viewBox="0 0 24 24"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
+            <span class="badge"></span>
+          </button>
+          <button class="icon-btn ripple" aria-label="Profil">
+            <svg viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+          </button>
+        </div>
+      </div>
+
+      <p class="greeting">Selamat datang kembali,</p>
+      <p class="admin-name">Admin Koperasi 👋</p>
+
+      <div class="summary-chips">
+        <div class="chip">
+          <div class="chip-dot" style="background:#4ADE80"></div>
+          <span>125 Anggota Aktif</span>
+        </div>
+        <div class="chip">
+          <div class="chip-dot" style="background:var(--bri-orange)"></div>
+          <span>8 Pengajuan Baru</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── Stat cards ──────────────────────────────────────── -->
+    <div class="stats-strip">
+      <div class="stat-card">
+        <div class="stat-icon" style="background:#EBF3FF">
+          <svg viewBox="0 0 24 24" style="stroke:var(--bri-blue);fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+        </div>
+        <div class="stat-value">125</div>
+        <div class="stat-label">Total<br>Anggota</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-icon" style="background:#E8F8EF">
+          <svg viewBox="0 0 24 24" style="stroke:var(--bri-green);fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/></svg>
+        </div>
+        <div class="stat-value" style="font-size:13px">850 Jt</div>
+        <div class="stat-label">Total<br>Aset</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-icon" style="background:#FEF3E2">
+          <svg viewBox="0 0 24 24" style="stroke:var(--bri-orange);fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
+        </div>
+        <div class="stat-value" style="font-size:13px">420 Jt</div>
+        <div class="stat-label">Pinjaman<br>Berjalan</div>
+      </div>
+    </div>
+
+    <!-- ── Financial overview ──────────────────────────────── -->
+    <div class="sec-header">
+      <span class="sec-title">Ringkasan Keuangan</span>
+      <span class="sec-link">Detail →</span>
+    </div>
+    <div class="finance-card">
+      <div class="finance-card-header">
+        <h3>Total Dana Koperasi</h3>
+        <svg width="18" height="18" viewBox="0 0 24 24" style="stroke:var(--muted);fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+      </div>
+      <div class="balance-row">
+        <span class="balance-currency">Rp</span>
+        <span class="balance-amount">850.000.000</span>
+      </div>
+      <div class="finance-divider"></div>
+      <div class="finance-row">
+        <div class="finance-item">
+          <span class="finance-item-label">Simpanan Masuk</span>
+          <span class="finance-item-value up">+Rp 24.500.000</span>
+        </div>
+        <div class="finance-item" style="text-align:right">
+          <span class="finance-item-label">Angsuran Diterima</span>
+          <span class="finance-item-value up">+Rp 18.750.000</span>
+        </div>
+      </div>
+
+      <!-- Trend bars (Maret – current month) -->
+      <div class="trend-bar" id="trendBar"></div>
+    </div>
+
+    <!-- ── Quick actions ───────────────────────────────────── -->
+    <div class="sec-header">
+      <span class="sec-title">Menu Cepat</span>
+    </div>
+    <div class="quick-actions">
+
+      <button class="qa-btn ripple">
+        <div class="qa-icon" style="background:#EBF3FF">
+          <svg viewBox="0 0 24 24" style="stroke:var(--bri-blue);fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round"><path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="8.5" cy="7" r="4"/><line x1="20" y1="8" x2="20" y2="14"/><line x1="23" y1="11" x2="17" y2="11"/></svg>
+        </div>
+        <span class="qa-label">Daftar Anggota</span>
+      </button>
+
+      <button class="qa-btn ripple">
+        <div class="qa-icon" style="background:#E8F8EF">
+          <svg viewBox="0 0 24 24" style="stroke:var(--bri-green);fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round"><polyline points="17 1 21 5 17 9"/><path d="M3 11V9a4 4 0 0 1 4-4h14"/><polyline points="7 23 3 19 7 15"/><path d="M21 13v2a4 4 0 0 1-4 4H3"/></svg>
+        </div>
+        <span class="qa-label">Setoran & Tarik</span>
+      </button>
+
+      <button class="qa-btn ripple">
+        <div class="qa-icon" style="background:#FEF3E2">
+          <svg viewBox="0 0 24 24" style="stroke:var(--bri-orange);fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>
+        </div>
+        <span class="qa-label">Pengajuan Pinjaman</span>
+      </button>
+
+      <button class="qa-btn ripple">
+        <div class="qa-icon" style="background:#F3EBFF">
+          <svg viewBox="0 0 24 24" style="stroke:#8B5CF6;fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
+        </div>
+        <span class="qa-label">Angsuran</span>
+      </button>
+
+      <button class="qa-btn ripple">
+        <div class="qa-icon" style="background:#FEF0EE">
+          <svg viewBox="0 0 24 24" style="stroke:var(--bri-red);fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg>
+        </div>
+        <span class="qa-label">Laporan</span>
+      </button>
+
+      <button class="qa-btn ripple">
+        <div class="qa-icon" style="background:#E8F8EF">
+          <svg viewBox="0 0 24 24" style="stroke:var(--bri-green);fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+        </div>
+        <span class="qa-label">Jadwal Angsuran</span>
+      </button>
+
+      <button class="qa-btn ripple">
+        <div class="qa-icon" style="background:#EBF3FF">
+          <svg viewBox="0 0 24 24" style="stroke:var(--bri-blue);fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+        </div>
+        <span class="qa-label">Cari Anggota</span>
+      </button>
+
+      <button class="qa-btn ripple">
+        <div class="qa-icon" style="background:#FEF3E2">
+          <svg viewBox="0 0 24 24" style="stroke:var(--bri-orange);fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round"><circle cx="12" cy="12" r="3"/><path d="M19.07 4.93A10 10 0 1 0 4.93 19.07 10 10 0 0 0 19.07 4.93z"/></svg>
+        </div>
+        <span class="qa-label">Pengaturan</span>
+      </button>
+    </div>
+
+    <!-- ── Pengajuan Pinjaman pending ─────────────────────── -->
+    <div class="sec-header">
+      <span class="sec-title">Pengajuan Menunggu ⏳</span>
+      <span class="sec-link">Lihat Semua</span>
+    </div>
+    <div class="member-list">
+      <div class="member-item ripple">
+        <div class="avatar" style="background:linear-gradient(135deg,#F59E0B,#EF4444)">AS</div>
+        <div class="member-info">
+          <div class="member-name">Agus Setiawan</div>
+          <div class="member-id">BRI-KOP-2026-00042 · Rp 15.000.000 / 24 bln</div>
+        </div>
+        <span class="member-badge badge-aktif">Tinjau</span>
+      </div>
+      <div class="member-item ripple">
+        <div class="avatar" style="background:linear-gradient(135deg,#8B5CF6,#EC4899)">NR</div>
+        <div class="member-info">
+          <div class="member-name">Novi Rahayu</div>
+          <div class="member-id">BRI-KOP-2026-00078 · Rp 8.500.000 / 12 bln</div>
+        </div>
+        <span class="member-badge badge-aktif">Tinjau</span>
+      </div>
+      <div class="member-item ripple">
+        <div class="avatar" style="background:linear-gradient(135deg,#10B981,#3B82F6)">HW</div>
+        <div class="member-info">
+          <div class="member-name">Hendra Wijaya</div>
+          <div class="member-id">BRI-KOP-2026-00091 · Rp 20.000.000 / 36 bln</div>
+        </div>
+        <span class="member-badge badge-aktif">Tinjau</span>
+      </div>
+    </div>
+
+    <!-- ── Recent transactions ─────────────────────────────── -->
+    <div class="sec-header">
+      <span class="sec-title">Transaksi Terkini</span>
+      <span class="sec-link">Lihat Semua</span>
+    </div>
+    <div class="tx-list">
+      <div class="tx-item ripple">
+        <div class="tx-icon" style="background:#E8F8EF">
+          <svg viewBox="0 0 24 24" style="stroke:var(--bri-green);fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round"><line x1="12" y1="5" x2="12" y2="19"/><polyline points="19 12 12 19 5 12"/></svg>
+        </div>
+        <div class="tx-info">
+          <div class="tx-desc">Setoran Simpanan Wajib</div>
+          <div class="tx-meta">Budi Santoso · 31 Mar 2026, 09:14</div>
+        </div>
+        <span class="tx-amount credit">+Rp 200.000</span>
+      </div>
+      <div class="tx-item ripple">
+        <div class="tx-icon" style="background:#EBF3FF">
+          <svg viewBox="0 0 24 24" style="stroke:var(--bri-blue);fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/></svg>
+        </div>
+        <div class="tx-info">
+          <div class="tx-desc">Pencairan Pinjaman</div>
+          <div class="tx-meta">Siti Aminah · 31 Mar 2026, 08:55</div>
+        </div>
+        <span class="tx-amount debit">-Rp 10.000.000</span>
+      </div>
+      <div class="tx-item ripple">
+        <div class="tx-icon" style="background:#FEF3E2">
+          <svg viewBox="0 0 24 24" style="stroke:var(--bri-orange);fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round"><polyline points="17 1 21 5 17 9"/><path d="M3 11V9a4 4 0 0 1 4-4h14"/></svg>
+        </div>
+        <div class="tx-info">
+          <div class="tx-desc">Angsuran Pinjaman</div>
+          <div class="tx-meta">Rudi Hartono · 31 Mar 2026, 08:30</div>
+        </div>
+        <span class="tx-amount credit">+Rp 856.000</span>
+      </div>
+      <div class="tx-item ripple">
+        <div class="tx-icon" style="background:#E8F8EF">
+          <svg viewBox="0 0 24 24" style="stroke:var(--bri-green);fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round"><line x1="12" y1="5" x2="12" y2="19"/><polyline points="19 12 12 19 5 12"/></svg>
+        </div>
+        <div class="tx-info">
+          <div class="tx-desc">Setoran Simpanan Pokok</div>
+          <div class="tx-meta">Dewi Kusuma · 30 Mar 2026, 15:20</div>
+        </div>
+        <span class="tx-amount credit">+Rp 500.000</span>
+      </div>
+    </div>
+
+    <!-- ── Anggota aktif terbaru ───────────────────────────── -->
+    <div class="sec-header">
+      <span class="sec-title">Anggota Terbaru</span>
+      <span class="sec-link">Lihat Semua</span>
+    </div>
+    <div class="member-list" style="margin-bottom:8px">
+      <div class="member-item ripple">
+        <div class="avatar" style="background:linear-gradient(135deg,var(--bri-blue),#38BDF8)">BS</div>
+        <div class="member-info">
+          <div class="member-name">Budi Santoso</div>
+          <div class="member-id">BRI-KOP-2026-00001 · Bergabung 28 Mar 2026</div>
+        </div>
+        <span class="member-badge badge-aktif">Aktif</span>
+      </div>
+      <div class="member-item ripple">
+        <div class="avatar" style="background:linear-gradient(135deg,#F59E0B,#F97316)">SA</div>
+        <div class="member-info">
+          <div class="member-name">Siti Aminah</div>
+          <div class="member-id">BRI-KOP-2026-00002 · Bergabung 29 Mar 2026</div>
+        </div>
+        <span class="member-badge badge-aktif">Aktif</span>
+      </div>
+      <div class="member-item ripple">
+        <div class="avatar" style="background:linear-gradient(135deg,#10B981,#059669)">RH</div>
+        <div class="member-info">
+          <div class="member-name">Rudi Hartono</div>
+          <div class="member-id">BRI-KOP-2026-00003 · Bergabung 30 Mar 2026</div>
+        </div>
+        <span class="member-badge badge-aktif">Aktif</span>
+      </div>
+      <div class="member-item ripple">
+        <div class="avatar" style="background:linear-gradient(135deg,#8B5CF6,#6D28D9)">DK</div>
+        <div class="member-info">
+          <div class="member-name">Dewi Kusuma</div>
+          <div class="member-id">BRI-KOP-2026-00004 · Bergabung 31 Mar 2026</div>
+        </div>
+        <span class="member-badge badge-nonaktif">Tidak Aktif</span>
+      </div>
+    </div>
+
+  </div><!-- /content -->
+
+  <!-- ── Bottom navigation bar ─────────────────────────────── -->
+  <nav class="bottom-nav">
+    <button class="nav-item active">
+      <svg viewBox="0 0 24 24"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+      <span>Beranda</span>
+    </button>
+    <button class="nav-item">
+      <svg viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+      <span>Anggota</span>
+    </button>
+    <!-- FAB -->
+    <div class="nav-fab-wrap">
+      <button class="nav-fab">
+        <svg viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+      </button>
+      <span class="nav-fab-label">Baru</span>
+    </div>
+    <button class="nav-item">
+      <svg viewBox="0 0 24 24"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
+      <span>Pinjaman</span>
+    </button>
+    <button class="nav-item">
+      <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.07 4.93A10 10 0 1 0 4.93 19.07"/></svg>
+      <span>Profil</span>
+    </button>
+  </nav>
+
+</div><!-- /shell -->
+
+<script>
+  /* ── Live clock ──────────────────────────────────── */
+  function tick() {
+    const now = new Date();
+    const h = String(now.getHours()).padStart(2, '0');
+    const m = String(now.getMinutes()).padStart(2, '0');
+    document.getElementById('clock').textContent = h + ':' + m;
+  }
+  tick();
+  setInterval(tick, 60000);
+
+  /* ── Trend bars ──────────────────────────────────── */
+  const months = ['Okt', 'Nov', 'Des', 'Jan', 'Feb', 'Mar'];
+  const vals   = [55, 68, 72, 80, 76, 100];
+  const colors = ['#93C5FD','#93C5FD','#93C5FD','#93C5FD','#93C5FD','#00529B'];
+  const container = document.getElementById('trendBar');
+  months.forEach((m, i) => {
+    const col = document.createElement('div');
+    col.className = 'trend-col';
+    col.innerHTML = `
+      <div class="bar-bg">
+        <div class="bar-fill" style="height:${vals[i]}%;background:${colors[i]}"></div>
+      </div>
+      <span class="bar-label">${m}</span>`;
+    container.appendChild(col);
+  });
+
+  /* ── Bottom nav active state ─────────────────────── */
+  document.querySelectorAll('.nav-item').forEach(btn => {
+    btn.addEventListener('click', function() {
+      document.querySelectorAll('.nav-item').forEach(b => b.classList.remove('active'));
+      this.classList.add('active');
+    });
+  });
+</script>
+</body>
+</html>
